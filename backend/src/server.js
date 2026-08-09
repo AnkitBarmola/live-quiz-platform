@@ -1,13 +1,9 @@
-const http = require('http');
+require('dotenv').config();
+
 const app = require('./app');
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+const PORT = process.env.PORT || 5000;
 
-const server = http.createServer(app);
-
-server.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on http://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-module.exports = server;
