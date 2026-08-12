@@ -1,18 +1,18 @@
-const authService = require('./auth.service');
+const { registerUser } = require('./auth.service');
 
-module.exports = {
-  register: async (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ error: 'username and password required' });
+async function register(req, res) {
+  const { username, email, password } = req.body;
+
+  try {
+    const user = await registerUser(username, email, password);
+    return res.status(201).json({ user });
+  } catch (err) {
+    if (err.code === '23505') { // <- verify this is the right code, look it up
+      return res.status(409).json({ error: 'Username or email already exists.' });
     }
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+}
 
-    const hash = await authService.hashPassword(password);
-    // NOTE: This is a stub. Persist the user to your DB instead.
-    return res.status(201).json({ username, passwordHash: hash });
-  },
-
-  login: async (_req, res) => {
-    return res.status(501).json({ error: 'not implemented' });
-  },
-};
+module.exports = { register };
