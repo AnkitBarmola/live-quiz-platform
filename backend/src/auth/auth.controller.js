@@ -21,8 +21,11 @@ async function register(req, res) {
     const { user, token } = await loginUser(email, password);
     return res.status(200).json({ user, token });
   } catch (err) {
+    if (err.message === 'Invalid credentials') {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     console.error(err);
-    return res.status(401).json({ error: 'Invalid credentials' });
+    return res.status(500).json({ error: 'Something went wrong.' });
   } 
 }
 
