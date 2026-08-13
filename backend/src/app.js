@@ -4,16 +4,11 @@ const app = express();
 
 app.use(express.json());
 
+const authRoutes = require('./auth/auth.routes');
+app.use('/api/auth', authRoutes);
+
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', message: 'Live Quiz Platform backend' });
 });
-
-// Mount auth routes if present
-try {
-  const authRoutes = require('./auth/auth.routes');
-  app.use('/auth', authRoutes);
-} catch (err) {
-  // ignore if auth routes not implemented yet
-}
 
 module.exports = app;
