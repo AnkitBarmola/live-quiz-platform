@@ -38,6 +38,35 @@ function validateRegisterInput(req, res, next) {
   return next();
 }
 
+function validateLoginInput(req, res, next) {
+  const { email, password } = req.body || {};
+  const errors = [];
+
+  // Type check: email must be a string and valid
+  if (typeof email !== 'string') {
+    errors.push('Email must be a string.');
+  } else if (!validator.isEmail(email)) {
+    errors.push('Email must be a valid email address.');
+  }
+
+  // Type check: password must be a string and not empty
+  if (typeof password !== 'string') {
+    errors.push('Password must be a string.');
+  } else if (password.length === 0) {
+    errors.push('Password cannot be empty.');
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      error: 'Invalid login input',
+      details: errors,
+    });
+  }
+
+  return next();
+}
+
 module.exports = {
   validateRegisterInput,
+  validateLoginInput,
 };
