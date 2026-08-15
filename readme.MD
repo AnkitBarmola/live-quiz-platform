@@ -2,7 +2,7 @@
  
 A Kahoot-style live quiz platform built from scratch to explore modern backend system design patterns: REST APIs, WebSocket-based real-time communication, relational data modeling, and fast in-memory ranking with Redis.
  
-> 🚧 **Status: Early development.** Currently implementing authentication and core API structure. This README will be updated as new features are completed.
+> 🚧 **Status: Early development.** Currently implementing authentication, core API structure, and database schema. This README will be updated as new features are completed.
  
 ## Why this project
  
