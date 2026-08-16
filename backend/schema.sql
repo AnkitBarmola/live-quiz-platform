@@ -28,3 +28,15 @@ CREATE TABLE quiz_participants (
     display_name  VARCHAR(50) NOT NULL,
     joined_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE answers (
+    id                SERIAL PRIMARY KEY,
+    quiz_id           INTEGER NOT NULL REFERENCES quizzes(id),
+    participant_id    INTEGER NOT NULL REFERENCES quiz_participants(id),
+    question_id       INTEGER NOT NULL REFERENCES questions(id),
+    selected_option   CHAR(1) NOT NULL CHECK (selected_option IN ('A','B','C','D')),
+    is_correct        BOOLEAN NOT NULL,
+    response_time_ms  INTEGER NOT NULL,
+    points_awarded    INTEGER NOT NULL,
+    answered_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
