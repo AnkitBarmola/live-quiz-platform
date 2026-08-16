@@ -21,3 +21,10 @@ CREATE TABLE questions (
     correct_option  CHAR(1) NOT NULL CHECK (correct_option IN ('A','B','C','D')),
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE quiz_participants (
+    id            SERIAL PRIMARY KEY,
+    quiz_id       INTEGER NOT NULL REFERENCES quizzes(id),
+    display_name  VARCHAR(50) NOT NULL,
+    joined_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
