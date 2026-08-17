@@ -66,7 +66,34 @@ function validateLoginInput(req, res, next) {
   return next();
 }
 
+function validateCreateQuiz(req, res, next) {
+  const { title, description } = req.body || {};
+  const errors = [];
+
+  // Type check: title must be a string
+  if (typeof title !== 'string') {
+    errors.push('Title must be a string.');
+  } else if (title.trim().length < 3) {
+    errors.push('Title must be at least 3 characters long.');
+  }
+
+  // Type check: description is optional, but if provided must be a string
+  if (description !== undefined && typeof description !== 'string') {
+    errors.push('Description must be a string.');
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      error: 'Invalid quiz input',
+      details: errors,
+    });
+  }
+
+  return next();
+}
+
 module.exports = {
   validateRegisterInput,
   validateLoginInput,
+  validateCreateQuiz,
 };
