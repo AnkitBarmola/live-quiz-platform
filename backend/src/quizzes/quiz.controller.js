@@ -1,4 +1,4 @@
-const { createQuiz, addQuestion } = require('./quiz.service');
+const { createQuiz, addQuestion, getQuizWithQuestions } = require('./quiz.service');
 
 async function create(req, res) {
   const { title, description } = req.body;
@@ -43,5 +43,20 @@ async function addQuestionToQuiz(req, res) {
     return res.status(500).json({ error: 'Something went wrong.' });
   }
 }
+async function getQuiz(req, res) {
+  const { quizId } = req.params;
+  const hostId = req.user.id;
 
-module.exports = { create, addQuestionToQuiz };
+  try {
+    const quiz = await getQuizWithQuestions(quizId, hostId);
+    return res.status(200).json({ quiz });
+  } catch (err) {
+    if (err.message === 'Not authorized to view this quiz') {
+      return res.status(403).json({ error: err.message });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+}
+
+module.exports = { create, addQuestionToQuiz, getQuiz };

@@ -51,4 +51,24 @@ async function addQuestion(quizId, hostId, questionData) {
   return questionResult.rows[0];
 }
 
-module.exports = { createQuiz, addQuestion };
+async function getQuizWithQuestions(quizId, hostId) {
+  const quizResult = await pool.query(
+    'SELECT id, host_id, title, description, room_code, status, created_at FROM quizzes WHERE id = $1 AND host_id = $2',
+    [quizId, hostId]
+  );
+
+  if (quizResult.rows.length === 0) {
+    throw new Error('Not authorized to view this quiz');
+  }
+
+  const questionsResult = await pool.query(
+    'SELECT id, question_text, option_a, option_b, option_c, option_d, correct_option FROM questions WHERE quiz_id = $1 ORDER BY id ASC',
+    [quizId]
+  );
+
+  const quiz = quizResult.rows[0];
+  quiz.questions = questionsResult.rows;
+  return quiz;
+}
+
+module.exports = { createQuiz, addQuestion, getQuizWithQuestions };
