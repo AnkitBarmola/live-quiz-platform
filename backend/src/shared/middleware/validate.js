@@ -92,8 +92,48 @@ function validateCreateQuiz(req, res, next) {
   return next();
 }
 
+function validateAddQuestion(req, res, next) {
+  const {
+    question_text,
+    option_a,
+    option_b,
+    option_c,
+    option_d,
+    correct_option,
+  } = req.body || {};
+  const errors = [];
+
+  if (typeof question_text !== 'string' || question_text.trim().length === 0) {
+    errors.push('Question text is required.');
+  }
+
+  const options = { option_a, option_b, option_c, option_d };
+  for (const [key, value] of Object.entries(options)) {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      errors.push(`${key} is required.`);
+    }
+  }
+
+  if (
+    typeof correct_option !== 'string' ||
+    !['A', 'B', 'C', 'D'].includes(correct_option)
+  ) {
+    errors.push('correct_option must be one of A, B, C, D.');
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      error: 'Invalid question input',
+      details: errors,
+    });
+  }
+
+  return next();
+}
+
 module.exports = {
   validateRegisterInput,
   validateLoginInput,
   validateCreateQuiz,
+  validateAddQuestion,
 };
