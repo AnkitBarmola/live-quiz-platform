@@ -1,4 +1,10 @@
-const { createQuiz, addQuestion, getQuizWithQuestions } = require('./quiz.service');
+const {
+  createQuiz,
+  addQuestion,
+  startQuiz,
+  joinQuiz,
+  getQuizWithQuestions,
+} = require('./quiz.service');
 
 async function create(req, res) {
   const { title, description } = req.body;
@@ -59,4 +65,41 @@ async function getQuiz(req, res) {
   }
 }
 
-module.exports = { create, addQuestionToQuiz, getQuiz };
+async function start(req, res) {
+  const { quizId } = req.params;
+  const hostId = req.user.id;
+
+  try {
+    const quiz = await startQuiz(quizId, hostId);
+    return res.status(200).json({ quiz });
+  } catch (err) {
+    if (err.message === 'Not authorized to modify this quiz') {
+      return res.status(403).json({ error: err.message });
+    }
+    if (err.message === 'Quiz must have at least one question') {
+      return res.status(400).json({ error: err.message });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+}
+
+async function join(req, res) {
+  const { roomCode, displayName } = req.body;
+
+  try {
+    const participant = await joinQuiz(roomCode, displayName);
+    return res.status(201).json({ participant });
+  } catch (err) {
+    if (err.message === 'Quiz not found') {
+      return res.status(404).json({ error: err.message });
+    }
+    if (err.message === 'Quiz is not accepting participants') {
+      return res.status(409).json({ error: err.message });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+}
+
+module.exports = { create, addQuestionToQuiz, getQuiz, start, join };

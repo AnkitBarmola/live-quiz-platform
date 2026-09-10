@@ -131,9 +131,34 @@ function validateAddQuestion(req, res, next) {
   return next();
 }
 
+function validateJoinQuiz(req, res, next) {
+  const { roomCode, displayName } = req.body || {};
+  const errors = [];
+
+  if (typeof roomCode !== 'string' || roomCode.trim().length === 0) {
+    errors.push('Room code is required.');
+  }
+
+  if (typeof displayName !== 'string' || displayName.trim().length === 0) {
+    errors.push('Display name is required.');
+  } else if (displayName.trim().length > 50) {
+    errors.push('Display name must be 50 characters or fewer.');
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      error: 'Invalid join input',
+      details: errors,
+    });
+  }
+
+  return next();
+}
+
 module.exports = {
   validateRegisterInput,
   validateLoginInput,
   validateCreateQuiz,
   validateAddQuestion,
+  validateJoinQuiz,
 };
