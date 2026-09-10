@@ -51,6 +51,56 @@ async function addQuestion(quizId, hostId, questionData) {
   return questionResult.rows[0];
 }
 
+async function startQuiz(quizId, hostId) {
+  const quizResult = await pool.query(
+    'SELECT id FROM quizzes WHERE id = $1 AND host_id = $2',
+    [quizId, hostId]
+  );
+
+  if (quizResult.rows.length === 0) {
+    throw new Error('Not authorized to modify this quiz');
+  }
+
+  const questionResult = await pool.query(
+    'SELECT id FROM questions WHERE quiz_id = $1 LIMIT 1',
+    [quizId]
+  );
+
+  if (questionResult.rows.length === 0) {
+    throw new Error('Quiz must have at least one question');
+  }
+
+  const startedQuizResult = await pool.query(
+    "UPDATE quizzes SET status = 'active', started_at = NOW() WHERE id = $1 RETURNING *",
+    [quizId]
+  );
+
+  return startedQuizResult.rows[0];
+}
+
+async function joinQuiz(roomCode, displayName) {
+  const quizResult = await pool.query(
+    'SELECT id, status FROM quizzes WHERE room_code = $1',
+    [roomCode]
+  );
+
+  if (quizResult.rows.length === 0) {
+    throw new Error('Quiz not found');
+  }
+
+  const quiz = quizResult.rows[0];
+  if (quiz.status !== 'active') {
+    throw new Error('Quiz is not accepting participants');
+  }
+
+  const participantResult = await pool.query(
+    'INSERT INTO quiz_participants (quiz_id, display_name) VALUES ($1, $2) RETURNING *',
+    [quiz.id, displayName]
+  );
+
+  return participantResult.rows[0];
+}
+
 async function getQuizWithQuestions(quizId, hostId) {
   const quizResult = await pool.query(
     'SELECT id, host_id, title, description, room_code, status, created_at FROM quizzes WHERE id = $1 AND host_id = $2',
@@ -71,4 +121,10 @@ async function getQuizWithQuestions(quizId, hostId) {
   return quiz;
 }
 
-module.exports = { createQuiz, addQuestion, getQuizWithQuestions };
+module.exports = {
+  createQuiz,
+  addQuestion,
+  startQuiz,
+  joinQuiz,
+  getQuizWithQuestions,
+};
