@@ -89,7 +89,7 @@ async function joinQuiz(roomCode, displayName) {
   }
 
   const quiz = quizResult.rows[0];
-  if (quiz.status !== 'active') {
+  if (quiz.status !== 'waiting') {
     throw new Error('Quiz is not accepting participants');
   }
 
