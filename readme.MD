@@ -64,8 +64,7 @@ backend/
     auth/              # Auth feature (routes, controller, service)
     quizzes/           # Quiz, question, and session lifecycle feature (routes, controller, service, utils)
     ...                # More feature modules added as built (sockets)
-  db/
-    schema.sql         # Full CREATE TABLE statements, version-controlled
+  schema.sql           # Full CREATE TABLE statements, version-controlled
 frontend/              # React client (coming later)
 ```
 
@@ -94,7 +93,7 @@ cp .env.example .env
 
 # Create the database and load the schema
 psql -U postgres -c "CREATE DATABASE quiz_platform;"
-psql -U postgres -d quiz_platform -f db/schema.sql
+psql -U postgres -d quiz_platform -f schema.sql
 
 # Start the development server
 npm run dev
