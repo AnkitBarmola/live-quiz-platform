@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const redisClient = require('../config/redis');
 const { generateRoomCode } = require('./quiz.utils');
 
 async function createQuiz(hostId, title, description) {
@@ -121,10 +122,34 @@ async function getQuizWithQuestions(quizId, hostId) {
   return quiz;
 }
 
+async function startQuestion(quizId, questionId) {
+  const result = await pool.query(
+    'SELECT id, question_text, option_a, option_b, option_c, option_d, correct_option FROM questions WHERE id = $1 AND quiz_id = $2',
+    [questionId, quizId]
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error('Question not found');
+  }
+
+  const question = result.rows[0];
+  const startTime = Date.now();
+
+  await redisClient.hSet(`quiz:${quizId}:activeQuestion`, {
+    questionId: question.id.toString(),
+    correctOption: question.correct_option,
+    startTime: startTime.toString(),
+  });
+
+  const { correct_option, ...safeQuestion } = question;
+  return safeQuestion;
+}
+
 module.exports = {
   createQuiz,
   addQuestion,
   startQuiz,
   joinQuiz,
   getQuizWithQuestions,
+  startQuestion,
 };

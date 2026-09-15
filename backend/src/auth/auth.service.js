@@ -3,19 +3,14 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 
 async function registerUser(username, email, password) {
-  // 1. hash the password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 2. insert into DB using a parameterized query
   const result = await pool.query(
     'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email, created_at',
     [username, email, hashedPassword]
   );
 
-  // 3. return the newly created user row
   return result.rows[0];
-
-  
 }
 
 async function loginUser(email, password) {
@@ -36,10 +31,8 @@ async function loginUser(email, password) {
     throw new Error('Invalid credentials');
   }
 
-  // Remove the password hash from the returned user object
   delete user.password_hash;
 
-  // Generate JWT token
   const token = jwt.sign(
     { id: user.id },
     process.env.JWT_SECRET,

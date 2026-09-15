@@ -7,13 +7,16 @@ const http = require('http');
 const { Server } = require('socket.io');
 const app = require('./app');
 
+const redisClient = require('./config/redis');
+const { startQuestion } = require('./quizzes/quiz.service');
+
 const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: '*', // tighten this later once you have a real frontend URL
+    origin: '*',
   },
 });
 
@@ -21,7 +24,6 @@ io.on('connection', async (socket) => {
   const { token, participantId, quizId } = socket.handshake.auth;
 
   if (token) {
-    // HOST connection
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.hostId = decoded.id;
@@ -33,7 +35,6 @@ io.on('connection', async (socket) => {
       return;
     }
   } else if (participantId && quizId) {
-    // PLAYER connection — verify the pairing is real
     try {
       const result = await pool.query(
         'SELECT id FROM quiz_participants WHERE id = $1 AND quiz_id = $2',
@@ -58,6 +59,17 @@ io.on('connection', async (socket) => {
     socket.disconnect();
     return;
   }
+
+  socket.on('host:start-question', async ({ quizId, questionId }) => {
+    if (!socket.hostId) return;
+
+    try {
+      const question = await startQuestion(quizId, questionId);
+      io.to(quizId.toString()).emit('question:started', question);
+    } catch (err) {
+      socket.emit('error-event', { message: err.message });
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log(`Socket ${socket.id} disconnected`);
