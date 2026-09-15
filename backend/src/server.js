@@ -1,5 +1,8 @@
 require('dotenv').config();
 
+const jwt = require('jsonwebtoken');
+const pool = require('./config/db');
+
 const http = require('http');
 const { Server } = require('socket.io');
 const app = require('./app');
@@ -14,15 +17,46 @@ const io = new Server(server, {
   },
 });
 
-io.on('connection', (socket) => {
-  const { participantId, quizId } = socket.handshake.auth;
+io.on('connection', async (socket) => {
+  const { token, participantId, quizId } = socket.handshake.auth;
 
-  if (quizId) {
-    socket.join(quizId.toString());
-    console.log(`Socket ${socket.id} joined room ${quizId}`);
-
-    // Notify everyone else in the room (not this socket) that someone joined
-    socket.to(quizId.toString()).emit('player-joined', { participantId });
+  if (token) {
+    // HOST connection
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.hostId = decoded.id;
+      socket.join(quizId.toString());
+      console.log(`Host ${decoded.id} joined room ${quizId}`);
+    } catch (err) {
+      socket.emit('auth-error', { message: 'Invalid or expired token' });
+      socket.disconnect();
+      return;
+    }
+  } else if (participantId && quizId) {
+    // PLAYER connection — verify the pairing is real
+    try {
+      const result = await pool.query(
+        'SELECT id FROM quiz_participants WHERE id = $1 AND quiz_id = $2',
+        [participantId, quizId]
+      );
+      if (result.rows.length === 0) {
+        socket.emit('auth-error', { message: 'Invalid participant or quiz' });
+        socket.disconnect();
+        return;
+      }
+      socket.participantId = participantId;
+      socket.join(quizId.toString());
+      console.log(`Participant ${participantId} joined room ${quizId}`);
+      socket.to(quizId.toString()).emit('player-joined', { participantId });
+    } catch (err) {
+      console.error(err);
+      socket.disconnect();
+      return;
+    }
+  } else {
+    socket.emit('auth-error', { message: 'Missing credentials' });
+    socket.disconnect();
+    return;
   }
 
   socket.on('disconnect', () => {
