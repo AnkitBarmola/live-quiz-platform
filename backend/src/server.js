@@ -8,7 +8,7 @@ const { Server } = require('socket.io');
 const app = require('./app');
 
 const redisClient = require('./config/redis');
-const { startQuestion } = require('./quizzes/quiz.service');
+const { startQuestion, submitAnswer, getLeaderboard } = require('./quizzes/quiz.service');
 
 const PORT = process.env.PORT || 5000;
 
@@ -66,6 +66,20 @@ io.on('connection', async (socket) => {
     try {
       const question = await startQuestion(quizId, questionId);
       io.to(quizId.toString()).emit('question:started', question);
+    } catch (err) {
+      socket.emit('error-event', { message: err.message });
+    }
+  });
+
+  socket.on('player:submit-answer', async ({ quizId, questionId, selectedOption }) => {
+    if (!socket.participantId) return;
+
+    try {
+      const result = await submitAnswer(quizId, socket.participantId, questionId, selectedOption);
+      socket.emit('answer:result', result);
+
+      const leaderboard = await getLeaderboard(quizId);
+      io.to(quizId.toString()).emit('leaderboard:update', leaderboard);
     } catch (err) {
       socket.emit('error-event', { message: err.message });
     }

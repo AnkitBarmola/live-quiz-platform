@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 const redisClient = require('../config/redis');
-const { generateRoomCode } = require('./quiz.utils');
+const { generateRoomCode, QUESTION_TIME_LIMIT_MS } = require('./quiz.utils');
 
 async function createQuiz(hostId, title, description) {
   const MAX_ATTEMPTS = 5;
@@ -145,6 +145,60 @@ async function startQuestion(quizId, questionId) {
   return safeQuestion;
 }
 
+async function submitAnswer(quizId, participantId, questionId, selectedOption) {
+  const activeQuestion = await redisClient.hGetAll(`quiz:${quizId}:activeQuestion`);
+
+  if (!activeQuestion.questionId || activeQuestion.questionId !== questionId.toString()) {
+    throw new Error('No active question or question mismatch');
+  }
+
+  const alreadyAnsweredKey = `quiz:${quizId}:question:${questionId}:answered`;
+  const alreadyAnswered = await redisClient.sIsMember(
+    alreadyAnsweredKey,
+    participantId.toString()
+  );
+  if (alreadyAnswered) {
+    throw new Error('Already answered this question');
+  }
+  await redisClient.sAdd(alreadyAnsweredKey, participantId.toString());
+
+  const startTime = parseInt(activeQuestion.startTime, 10);
+  const elapsed = Math.min(Date.now() - startTime, QUESTION_TIME_LIMIT_MS);
+  const isCorrect =
+    elapsed < QUESTION_TIME_LIMIT_MS && selectedOption === activeQuestion.correctOption;
+
+  const points = isCorrect
+    ? 100 + Math.floor(100 * (1 - elapsed / QUESTION_TIME_LIMIT_MS))
+    : 0;
+
+  await pool.query(
+    `INSERT INTO answers
+      (quiz_id, participant_id, question_id, selected_option, is_correct, response_time_ms, points_awarded)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [quizId, participantId, questionId, selectedOption, isCorrect, elapsed, points]
+  );
+
+  if (points > 0) {
+    await redisClient.zIncrBy(`quiz:${quizId}:leaderboard`, points, participantId.toString());
+  }
+
+  return { isCorrect, points };
+}
+
+async function getLeaderboard(quizId) {
+  const raw = await redisClient.zRangeWithScores(
+    `quiz:${quizId}:leaderboard`,
+    0,
+    -1,
+    { REV: true }
+  );
+
+  return raw.map((entry) => ({
+    participantId: entry.value,
+    score: entry.score,
+  }));
+}
+
 module.exports = {
   createQuiz,
   addQuestion,
@@ -152,4 +206,6 @@ module.exports = {
   joinQuiz,
   getQuizWithQuestions,
   startQuestion,
+  submitAnswer,
+  getLeaderboard,
 };

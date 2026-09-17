@@ -11,4 +11,6 @@ function generateRoomCode() {
   return result;
 }
 
-module.exports = { generateRoomCode };
+const QUESTION_TIME_LIMIT_MS = 20000;
+
+module.exports = { generateRoomCode, QUESTION_TIME_LIMIT_MS };
