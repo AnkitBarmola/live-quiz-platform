@@ -79,6 +79,26 @@ async function startQuiz(quizId, hostId) {
   return startedQuizResult.rows[0];
 }
 
+async function endQuiz(quizId, hostId) {
+  const quizResult = await pool.query(
+    'SELECT id FROM quizzes WHERE id = $1 AND host_id = $2',
+    [quizId, hostId]
+  );
+
+  if (quizResult.rows.length === 0) {
+    throw new Error('Not authorized to modify this quiz');
+  }
+
+  const endedQuizResult = await pool.query(
+    "UPDATE quizzes SET status = 'ended', ended_at = NOW() WHERE id = $1 RETURNING *",
+    [quizId]
+  );
+
+  await redisClient.del(`quiz:${quizId}:activeQuestion`);
+
+  return endedQuizResult.rows[0];
+}
+
 async function joinQuiz(roomCode, displayName) {
   const quizResult = await pool.query(
     'SELECT id, status FROM quizzes WHERE room_code = $1',
@@ -203,6 +223,7 @@ module.exports = {
   createQuiz,
   addQuestion,
   startQuiz,
+  endQuiz,
   joinQuiz,
   getQuizWithQuestions,
   startQuestion,

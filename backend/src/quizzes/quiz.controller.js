@@ -2,6 +2,7 @@ const {
   createQuiz,
   addQuestion,
   startQuiz,
+  endQuiz,
   joinQuiz,
   getQuizWithQuestions,
 } = require('./quiz.service');
@@ -84,6 +85,22 @@ async function start(req, res) {
   }
 }
 
+async function endQuizHandler(req, res) {
+  const { quizId } = req.params;
+  const hostId = req.user.id;
+
+  try {
+    const quiz = await endQuiz(quizId, hostId);
+    return res.status(200).json({ quiz });
+  } catch (err) {
+    if (err.message === 'Not authorized to modify this quiz') {
+      return res.status(403).json({ error: err.message });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+}
+
 async function join(req, res) {
   const { roomCode, displayName } = req.body;
 
@@ -102,4 +119,4 @@ async function join(req, res) {
   }
 }
 
-module.exports = { create, addQuestionToQuiz, getQuiz, start, join };
+module.exports = { create, addQuestionToQuiz, getQuiz, start, endQuizHandler, join };

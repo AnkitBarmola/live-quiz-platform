@@ -12,12 +12,14 @@ const {
 	addQuestionToQuiz,
 	getQuiz,
 	start,
+	endQuizHandler,
 	join,
 } = require('./quiz.controller');
 
 router.post('/', validateCreateQuiz, authenticateToken, create);
 router.post('/:quizId/questions', authenticateToken, validateAddQuestion, addQuestionToQuiz);
 router.post('/:quizId/start', authenticateToken, start);
+router.post('/:quizId/end', authenticateToken, endQuizHandler);
 router.post('/join', validateJoinQuiz, join);
 router.get('/:quizId', authenticateToken, getQuiz);
 
