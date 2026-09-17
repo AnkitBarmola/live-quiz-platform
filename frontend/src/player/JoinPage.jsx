@@ -41,15 +41,15 @@ export function JoinPage() {
   }
 
   return (
-    <main className="join-page">
-      <section className="join-panel" aria-labelledby="join-title">
-        <p className="eyebrow">Live quiz platform</p>
+    <main className="grid min-h-screen place-items-center animate-page-enter px-6 py-12 sm:px-8 sm:py-12">
+      <section className="box-border w-full max-w-[560px] rounded-design border border-gray-3 bg-gray-1 p-8 shadow-panel sm:p-12" aria-labelledby="join-title">
+        <p className="m-0 text-[13px] font-bold uppercase leading-[18px] text-gray-5">Live quiz platform</p>
         <h1 id="join-title">Join a quiz</h1>
-        <p className="join-intro">Enter the room code from your lecturer and choose a display name.</p>
-        {errors.form && <p className="form-error" role="alert">{errors.form}</p>}
+        <p className="my-4 text-[15px] leading-[22px] tracking-[0.01px] text-gray-5">Enter the room code from your lecturer and choose a display name.</p>
+        {errors.form && <p className="mb-6 mt-2 rounded-design border border-incorrect p-4 text-[13px] leading-[18px] text-incorrect" role="alert">{errors.form}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="join-field">
-            <label htmlFor="roomCode">Room code</label>
+          <div className="mt-6">
+            <label className="mb-2 block text-[15px] font-bold leading-[22px]" htmlFor="roomCode">Room code</label>
             <input
               id="roomCode"
               name="roomCode"
@@ -60,11 +60,12 @@ export function JoinPage() {
               spellCheck="false"
               inputMode="text"
               aria-invalid={Boolean(errors.roomCode)}
+              className="box-border min-h-12 w-full rounded-design border border-gray-4 bg-gray-1 px-4 py-4 text-[17px] font-bold leading-6 tracking-[2px] text-ink outline-2 outline-accent outline-offset-1 focus:border-gray-6 aria-[invalid=true]:border-incorrect"
             />
-            {errors.roomCode && <p className="field-error">{errors.roomCode}</p>}
+            {errors.roomCode && <p className="m-0 mt-2 text-[13px] leading-[18px] text-incorrect">{errors.roomCode}</p>}
           </div>
-          <div className="join-field">
-            <label htmlFor="displayName">Display name</label>
+          <div className="mt-6">
+            <label className="mb-2 block text-[15px] font-bold leading-[22px]" htmlFor="displayName">Display name</label>
             <input
               id="displayName"
               name="displayName"
@@ -72,10 +73,11 @@ export function JoinPage() {
               onChange={updateValue}
               autoComplete="nickname"
               aria-invalid={Boolean(errors.displayName)}
+              className="box-border min-h-12 w-full rounded-design border border-gray-4 bg-gray-1 px-4 py-4 text-[17px] leading-6 text-ink outline-2 outline-accent outline-offset-1 focus:border-gray-6 aria-[invalid=true]:border-incorrect normal-case"
             />
-            {errors.displayName && <p className="field-error">{errors.displayName}</p>}
+            {errors.displayName && <p className="m-0 mt-2 text-[13px] leading-[18px] text-incorrect">{errors.displayName}</p>}
           </div>
-          <button className="join-submit" type="submit" disabled={isSubmitting}>
+          <button className="mt-8 min-h-12 w-full rounded-design border border-ink bg-accent px-4 py-4 text-[17px] font-bold leading-6 text-ink transition duration-150 ease-standard hover:-translate-y-px disabled:cursor-wait disabled:opacity-60" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Joining...' : 'Join quiz'}
           </button>
         </form>

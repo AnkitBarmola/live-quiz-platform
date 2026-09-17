@@ -67,62 +67,62 @@ export function PlayPage() {
 
   if (!participantId || String(joinedQuizId) !== String(quizId)) {
     return (
-      <main className="join-page">
-        <section className="join-panel">
-          <p className="form-error" role="alert">Join this quiz before entering the play screen.</p>
-          <Link className="text-link" to="/join">Return to join</Link>
+      <main className="grid min-h-screen place-items-center animate-page-enter px-6 py-12 sm:px-8 sm:py-12">
+        <section className="box-border w-full max-w-[560px] rounded-design border border-gray-3 bg-gray-1 p-8 shadow-panel sm:p-12">
+          <p className="rounded-design border border-incorrect p-4 text-[13px] leading-[18px] text-incorrect" role="alert">Join this quiz before entering the play screen.</p>
+          <Link className="mt-6 inline-block text-[15px] font-bold leading-[22px] text-ink" to="/join">Return to join</Link>
         </section>
       </main>
     )
   }
 
   return (
-    <main className="play-page">
-      <section className="play-panel" aria-live="polite">
-        <p className="eyebrow">Room {quizId}</p>
+    <main className="grid min-h-screen place-items-center animate-page-enter px-6 py-12 sm:px-8 sm:py-12">
+      <section className="box-border w-full max-w-[720px] rounded-design border border-gray-3 bg-gray-1 p-8 text-center shadow-panel sm:p-12" aria-live="polite">
+        <p className="m-0 text-[13px] font-bold uppercase leading-[18px] text-gray-5">Room {quizId}</p>
         {!question && <h1>Waiting for the host to start...</h1>}
-        <p className="play-player">Playing as {displayName}</p>
+        <p className="mt-6 text-[15px] leading-[22px] tracking-[0.01px] text-gray-5 normal-case">Playing as {displayName}</p>
         {error && (
-          <div className="socket-error" role="alert">
+          <div className="mt-8 flex items-center justify-between gap-4 rounded-design border border-incorrect p-4 text-left text-[13px] leading-[18px] text-incorrect" role="alert">
             <span>{error}</span>
-            <button type="button" onClick={dismissError}>Dismiss</button>
+            <button className="shrink-0 border-0 bg-transparent p-2 font-bold text-inherit" type="button" onClick={dismissError}>Dismiss</button>
           </div>
         )}
-        {!error && connectionState === 'connecting' && <p className="play-status">Connecting...</p>}
-        {!error && connectionState === 'connected' && !question && <p className="play-status">Connected. Your screen will update when the host begins.</p>}
+        {!error && connectionState === 'connecting' && <p className="mt-6 text-[15px] leading-[22px] tracking-[0.01px] text-gray-5">Connecting...</p>}
+        {!error && connectionState === 'connected' && !question && <p className="mt-6 text-[15px] leading-[22px] tracking-[0.01px] text-gray-5">Connected. Your screen will update when the host begins.</p>}
         {question && (
-          <div className="player-question">
-            <div className="question-timer" data-warning={secondsRemaining <= 5}>{secondsRemaining}s</div>
+          <div className="mt-8">
+            <div className={`mx-auto w-fit rounded-design px-4 py-2 text-[22px] font-bold leading-7 ${secondsRemaining <= 5 ? 'bg-incorrect text-gray-1' : 'bg-gray-2 text-ink'}`} data-warning={secondsRemaining <= 5}>{secondsRemaining}s</div>
             <h1>{question.question_text}</h1>
             {answerState === 'result' ? (
-              <div className={`answer-result ${answerResult.isCorrect ? 'is-correct' : 'is-incorrect'}`}>
-                <strong>{answerResult.isCorrect ? 'Correct' : 'Incorrect'}</strong>
-                <span>{answerResult.points} points earned</span>
-                <p>Waiting for next question...</p>
+              <div className={`mt-8 rounded-design border p-6 ${answerResult.isCorrect ? 'border-correct text-correct' : 'border-incorrect text-incorrect'}`}>
+                <strong className="block text-[34px] font-bold leading-10">{answerResult.isCorrect ? 'Correct!' : 'Incorrect'}</strong>
+                <span className="mt-2 block text-[15px] leading-[22px] text-gray-5">{answerResult.points} points earned</span>
+                <p className="mt-4 text-[15px] leading-[22px] text-gray-5">Waiting for next question...</p>
               </div>
             ) : (
               <>
-                <div className="answer-options">
+                <div className="mt-8 grid gap-4 sm:grid-cols-2">
                   {['A', 'B', 'C', 'D'].map((option) => (
                     <button
-                      className="answer-option"
+                      className="flex min-h-16 items-center gap-4 rounded-design border border-gray-3 bg-gray-1 p-4 text-left text-ink transition hover:border-ink disabled:cursor-not-allowed disabled:opacity-60 data-[selected=true]:border-ink data-[selected=true]:bg-accent"
                       type="button"
                       key={option}
                       onClick={() => submitAnswer(option)}
                       disabled={answerState !== 'idle' || secondsRemaining === 0}
                       data-selected={selectedOption === option}
                     >
-                      <span>{option}</span>
-                      <strong>{question[`option_${option.toLowerCase()}`]}</strong>
+                      <span className="font-bold">{option}</span>
+                      <strong className="normal-case">{question[`option_${option.toLowerCase()}`]}</strong>
                     </button>
                   ))}
                 </div>
-                {answerState === 'submitting' && <p className="play-status">Answer submitted. Waiting for the result...</p>}
-                {secondsRemaining === 0 && <p className="play-status">Time is up. Waiting for the result...</p>}
+                {answerState === 'submitting' && <p className="mt-6 text-[15px] leading-[22px] tracking-[0.01px] text-gray-5">Answer submitted. Waiting for the result...</p>}
+                {secondsRemaining === 0 && <p className="mt-6 text-[15px] leading-[22px] tracking-[0.01px] text-gray-5">Time is up. Waiting for the result...</p>}
               </>
             )}
-            {ownStanding && <p className="player-standing">Your standing: {ownStanding.rank} · {ownStanding.score} points</p>}
-            {leaderboard.length > 0 && <p className="play-status">Leaderboard updated</p>}
+            {ownStanding && <p className="mt-6 text-[15px] leading-[22px] text-ink">Your standing: {ownStanding.rank} · {ownStanding.score} points</p>}
+            {leaderboard.length > 0 && <p className="mt-6 text-[15px] leading-[22px] tracking-[0.01px] text-gray-5">Leaderboard updated</p>}
           </div>
         )}
       </section>

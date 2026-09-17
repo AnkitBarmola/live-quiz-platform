@@ -22,16 +22,16 @@ function LandingPage() {
   const { token } = useAuth()
 
   return (
-    <main className="landing-page">
-      <section className="landing-content" aria-labelledby="landing-title">
-        <p className="eyebrow">Live quiz platform</p>
+    <main className="grid min-h-screen place-items-center animate-page-enter px-6 py-12 sm:px-8">
+      <section className="w-full max-w-[680px] text-center" aria-labelledby="landing-title">
+        <p className="m-0 text-[13px] font-bold uppercase leading-[18px] text-gray-5">Live quiz platform</p>
         <h1 id="landing-title">Live quizzes for classrooms</h1>
-        <p className="landing-intro">Create a quiz for your class or join one with a room code.</p>
-        <div className="landing-actions">
-          <Link className="landing-action landing-action-primary" to={token ? '/host/dashboard' : '/login'}>
+        <p className="mx-auto mt-4 text-[17px] leading-6 text-gray-5">Create a quiz for your class or join one with a room code.</p>
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Link className="grid min-h-16 place-items-center rounded-design border border-ink bg-ink px-6 py-4 text-[17px] font-bold leading-6 text-gray-1 no-underline transition duration-150 ease-standard hover:-translate-y-px" to={token ? '/host/dashboard' : '/login'}>
             Host a Quiz
           </Link>
-          <Link className="landing-action landing-action-secondary" to="/join">
+          <Link className="grid min-h-16 place-items-center rounded-design border border-ink bg-accent px-6 py-4 text-[17px] font-bold leading-6 text-ink no-underline transition duration-150 ease-standard hover:-translate-y-px" to="/join">
             Join a Quiz
           </Link>
         </div>
@@ -42,11 +42,11 @@ function LandingPage() {
 
 function Page({ title }) {
   return (
-    <main className="page-shell">
-      <p className="eyebrow">Live quiz platform</p>
+    <main className="box-border min-h-screen max-w-[960px] mx-auto animate-page-enter px-6 py-12 sm:px-8 sm:py-16">
+      <p className="m-0 text-[13px] font-bold uppercase leading-[18px] text-gray-5">Live quiz platform</p>
       <h1>{title}</h1>
       {title === 'Welcome' && (
-        <Link className="text-link" to="/join">
+        <Link className="mt-6 inline-block text-[15px] font-bold leading-[22px] text-ink">
           Join a quiz
         </Link>
       )}
