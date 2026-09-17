@@ -101,7 +101,7 @@ async function endQuiz(quizId, hostId) {
 
 async function joinQuiz(roomCode, displayName) {
   const quizResult = await pool.query(
-    'SELECT id, status FROM quizzes WHERE room_code = $1',
+    'SELECT id, status FROM quizzes WHERE LOWER(room_code) = LOWER($1)',
     [roomCode]
   );
 
@@ -110,7 +110,7 @@ async function joinQuiz(roomCode, displayName) {
   }
 
   const quiz = quizResult.rows[0];
-  if (quiz.status !== 'waiting') {
+  if (quiz.status === 'ended') {
     throw new Error('Quiz is not accepting participants');
   }
 
